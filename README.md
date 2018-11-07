@@ -1,42 +1,39 @@
 # Django HTTP/2 Server Push redirects
 
-This is a simple test project to try HTTP/2 Server Push redirects
+This is a test project to utilize HTTP/2 Server Push redirects
 with Django and nginx.
 
-This approach requires nginx>=1.3.9
+This approach requires nginx version 1.3.9 or later.
 
 
 ## Setup
 
-This is a `docker-compose` project, do you'll need to download and
-install [Docker Desktop](https://www.docker.com/products/docker-desktop)
-to try this.
+This is a `docker-compose` project, to run this project download and
+install [Docker Desktop](https://www.docker.com/products/docker-desktop).
 
 
 ### Certificates
 
-In order to use HTTP/2 it is required to get a certificate.
+In order to use HTTP/2 a certificate is required.
 
-I personally recommend to use [`minica`](https://github.com/jsha/minica)
-to generate a root CA cert and a cert for localhostL
+[`minica`](https://github.com/jsha/minica) is recommended
+to generate a certification for the root CA and the localhostL
 
     minica -domains localhost
 
-Then add the generated root CA file to your OS/browsers trust store
-and move the certs for `localhost` to `./conf/certs`.
+Then add the generated root CA file to the OS/browsers trust store
+and move the certification for `localhost` to `./conf/certs`.
 
-The expected filenames for the certs are `cert.pem` and `cert.key`.
+The expected filenames for the certifications are `cert.pem` and `cert.key`.
 
 
 ## Run the project
 
-Once you've set up the certificates you should be able to start
-nginx and Django using:
+Once the certificates have been set up, nginx and Django can be run by using:
 
     docker-compose up -d
     
-By visiting the following urls in a modern browser you should see the 
-difference between "normal" redirects and HTTP/2 Server Push redirects:
+Visiting the following urls in a modern browser difference between "normal" redirects and HTTP/2 Server Push redirects can be seen:
 
 * <http://localhost/hello/world> redirects to <http://localhost/hello/world/>
 * <https://localhost/hello/world> redirects to and pushes <https://localhost/hello/world/>
@@ -44,7 +41,7 @@ difference between "normal" redirects and HTTP/2 Server Push redirects:
 
 ### Code
 
-The important nginx bit is in `conf/nginx/default.conf`:
+The most important part of nginx is in `conf/nginx/default.conf`:
 
     server {
       ...
@@ -56,7 +53,7 @@ The important nginx bit is in `conf/nginx/default.conf`:
     }
 
 
-The important Django bit is in `push_redirect/http.py`:
+The important part of Django is in `push_redirect/http.py`:
 
     from django.http import HttpResponsePermanentRedirect
 
@@ -65,10 +62,10 @@ The important Django bit is in `push_redirect/http.py`:
             super().__init__(redirect_to, *args, **kwargs)
             self['Link'] = f'<{self.url}>; rel=preload'
 
-This subclass of `HttpResponsePermanentRedirect` adds a second
-header that's used by nginx to push te resource.
+This `HttpResponsePermanentRedirect` subclass adds a second
+header which is used by nginx to push the resource.
 
-This subclass is used as the redirect class in `CommonMiddleware`.
+The subclass is used as a redirect class in `CommonMiddleware`.
 
 
 ## Inspiration
